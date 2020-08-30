@@ -18,6 +18,7 @@ use Nijens\OpenapiBundle\EventListener\JsonRequestBodyValidationSubscriber;
 use Nijens\OpenapiBundle\Exception\BadJsonRequestHttpException;
 use Nijens\OpenapiBundle\Exception\InvalidRequestHttpException;
 use Nijens\OpenapiBundle\Json\SchemaLoaderInterface;
+use Nijens\OpenapiBundle\Routing\RouteContext;
 use Nijens\OpenapiBundle\Routing\RouteLoader;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -163,9 +164,12 @@ class JsonRequestBodyValidationSubscriberTest extends TestCase
 
         $request = new Request();
         $request->headers->set('Content-Type', 'application/json');
-        $request->attributes->set('_nijens_openapi', [
-            'openapi_resource' => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
-        ]);
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::RESOURCE => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
+            ]
+        );
 
         $event = new GetResponseEvent($kernelMock, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -190,10 +194,13 @@ class JsonRequestBodyValidationSubscriberTest extends TestCase
 
         $request = new Request();
         $request->headers->set('Content-Type', 'application/xml');
-        $request->attributes->set('_nijens_openapi', [
-            'openapi_resource' => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
-            'openapi_json_request_validation_pointer' => '/paths/~1pets/put/requestBody/content/application~1json/schema',
-        ]);
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::RESOURCE => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
+                RouteContext::JSON_REQUEST_VALIDATION_POINTER => '/paths/~1pets/put/requestBody/content/application~1json/schema',
+            ]
+        );
 
         $event = new GetResponseEvent($kernelMock, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -225,10 +232,13 @@ class JsonRequestBodyValidationSubscriberTest extends TestCase
 
         $request = new Request([], [], [], [], [], [], $requestBody);
         $request->headers->set('Content-Type', 'application/json');
-        $request->attributes->set('_nijens_openapi', [
-            'openapi_resource' => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
-            'openapi_json_request_validation_pointer' => '/paths/~1pets/put/requestBody/content/application~1json/schema',
-        ]);
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::RESOURCE => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
+                RouteContext::JSON_REQUEST_VALIDATION_POINTER => '/paths/~1pets/put/requestBody/content/application~1json/schema',
+            ]
+        );
 
         $event = new GetResponseEvent($kernelMock, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -270,10 +280,13 @@ class JsonRequestBodyValidationSubscriberTest extends TestCase
 
         $request = new Request([], [], [], [], [], [], $requestBody);
         $request->headers->set('Content-Type', 'application/json');
-        $request->attributes->set('_nijens_openapi', [
-            'openapi_resource' => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
-            'openapi_json_request_validation_pointer' => '/paths/~1pets/put/requestBody/content/application~1json/schema',
-        ]);
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::RESOURCE => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
+                RouteContext::JSON_REQUEST_VALIDATION_POINTER => '/paths/~1pets/put/requestBody/content/application~1json/schema',
+            ]
+        );
 
         $event = new GetResponseEvent($kernelMock, $request, HttpKernelInterface::MASTER_REQUEST);
 
@@ -330,10 +343,13 @@ class JsonRequestBodyValidationSubscriberTest extends TestCase
 
         $request = new Request([], [], [], [], [], [], $requestBody);
         $request->headers->set('Content-Type', 'application/json');
-        $request->attributes->set('_nijens_openapi', [
-            'openapi_resource' => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
-            'openapi_json_request_validation_pointer' => '/paths/~1pets/put/requestBody/content/application~1json/schema',
-        ]);
+        $request->attributes->set(
+            RouteContext::REQUEST_ATTRIBUTE,
+            [
+                RouteContext::RESOURCE => __DIR__.'/../Resources/specifications/json-request-body-validation-subscriber.json',
+                RouteContext::JSON_REQUEST_VALIDATION_POINTER => '/paths/~1pets/put/requestBody/content/application~1json/schema',
+            ]
+        );
 
         $event = new GetResponseEvent($kernelMock, $request, HttpKernelInterface::MASTER_REQUEST);
 

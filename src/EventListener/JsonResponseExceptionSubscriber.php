@@ -11,6 +11,7 @@
 
 namespace Nijens\OpenapiBundle\EventListener;
 
+use Nijens\OpenapiBundle\Routing\RouteContext;
 use Nijens\OpenapiBundle\Service\ExceptionJsonResponseBuilderInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
@@ -51,9 +52,9 @@ class JsonResponseExceptionSubscriber implements EventSubscriberInterface
      */
     public function onKernelExceptionTransformToJsonResponse(GetResponseForExceptionEvent $event): void
     {
-        $routeOptions = $event->getRequest()->attributes->get('_nijens_openapi');
+        $routeOptions = $event->getRequest()->attributes->get(RouteContext::REQUEST_ATTRIBUTE);
 
-        if (isset($routeOptions['openapi_resource']) === false) {
+        if (isset($routeOptions[RouteContext::RESOURCE]) === false) {
             return;
         }
 
