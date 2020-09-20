@@ -1,3 +1,5 @@
+![OpenAPI bundle logo](docs/logo.png)
+
 # OpenAPI bundle
 
 [![Latest version on Packagist][ico-version]][link-version]
