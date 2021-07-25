@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the OpenapiBundle package.
  *
@@ -51,7 +53,7 @@ class RouteLoader extends FileLoader
     /**
      * {@inheritdoc}
      */
-    public function supports($resource, $type = null): bool
+    public function supports($resource, string $type = null): bool
     {
         return self::TYPE === $type;
     }
@@ -59,7 +61,7 @@ class RouteLoader extends FileLoader
     /**
      * {@inheritdoc}
      */
-    public function load($resource, $type = null): RouteCollection
+    public function load($resource, string $type = null): RouteCollection
     {
         $file = $this->getLocator()->locate($resource, null, true);
 
