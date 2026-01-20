@@ -50,9 +50,9 @@ final class RequestHeadersParameterValidator implements ValidatorInterface
 
         $violations = [];
         foreach ($validateHeaderParameters as $parameterName => $parameter) {
-            $violations = \array_merge(
+            $violations = array_merge(
                 $violations,
-                $this->validateHeaderParameter($request, $parameterName, \json_decode($parameter))
+                $this->validateHeaderParameter($request, $parameterName, json_decode($parameter))
             );
         }
 

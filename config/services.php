@@ -44,7 +44,6 @@ use Nijens\OpenapiBundle\Validation\RequestValidator\RequestBodyValidator;
 use Nijens\OpenapiBundle\Validation\RequestValidator\RequestContentTypeValidator;
 use Nijens\OpenapiBundle\Validation\RequestValidator\RequestHeadersParameterValidator;
 use Nijens\OpenapiBundle\Validation\RequestValidator\RequestParameterValidator;
-use Nijens\OpenapiBundle\Validation\RequestValidator\RequestPathParameterValidator;
 use Nijens\OpenapiBundle\Validation\RequestValidator\ValidatorInterface;
 use Seld\JsonLint\JsonParser;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
@@ -205,12 +204,6 @@ return static function (ContainerConfigurator $container): void {
         ->tag('nijens_openapi.validation.validator', ['priority' => 32]);
 
     $services->set(RequestHeadersParameterValidator::class)
-        ->args([
-            service('nijens_openapi.json.validator'),
-        ])
-        ->tag('nijens_openapi.validation.validator', ['priority' => 32]);
-
-    $services->set(RequestPathParameterValidator::class)
         ->args([
             service('nijens_openapi.json.validator'),
         ])

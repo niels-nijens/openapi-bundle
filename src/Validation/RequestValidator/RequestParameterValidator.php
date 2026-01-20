@@ -50,9 +50,9 @@ final class RequestParameterValidator implements ValidatorInterface
 
         $violations = [];
         foreach ($validateQueryParameters as $parameterName => $parameter) {
-            $violations = \array_merge(
+            $violations = array_merge(
                 $violations,
-                $this->validateQueryParameter($request, $parameterName, \json_decode($parameter))
+                $this->validateQueryParameter($request, $parameterName, json_decode($parameter))
             );
         }
 
@@ -70,8 +70,7 @@ final class RequestParameterValidator implements ValidatorInterface
         $validationContext = $request->attributes->get(ValidationContext::REQUEST_ATTRIBUTE) ?? [
             ValidationContext::VALIDATED => true,
         ];
-        $validationContext[ValidationContext::REQUEST_PARAMETERS] =
-            \json_encode($this->getValidatedQueryParametersWithValues($validateQueryParameters, $request));
+        $validationContext[ValidationContext::REQUEST_PARAMETERS] = json_encode($this->getValidatedQueryParametersWithValues($validateQueryParameters, $request));
         $request->attributes->set(
             ValidationContext::REQUEST_ATTRIBUTE,
             $validationContext

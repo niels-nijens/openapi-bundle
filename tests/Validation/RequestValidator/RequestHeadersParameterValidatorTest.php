@@ -63,7 +63,7 @@ class RequestHeadersParameterValidatorTest extends TestCase
         $validatedContent = $request->attributes->get(ValidationContext::REQUEST_ATTRIBUTE);
         static::assertEquals([
             'bar' => 'foo',
-        ], \json_decode($validatedContent[ValidationContext::REQUEST_HEADERS_PARAMETERS], true));
+        ], json_decode($validatedContent[ValidationContext::REQUEST_HEADERS_PARAMETERS], true));
     }
 
     public function testCannotValidateRequiredRequestParameterWithoutValue(): void

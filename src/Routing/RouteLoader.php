@@ -204,18 +204,9 @@ class RouteLoader extends FileLoader
         }
 
         $openapiRouteContext[RouteContext::REQUEST_VALIDATE_HEADER_PARAMETERS] = [];
-        $openapiRouteContext[RouteContext::REQUEST_VALIDATE_PATH_PARAMETERS] = [];
-        $parameters = $this->getParameters(null, $operation, $pathItem);
+        $parameters = $this->getParameters('header', $operation, $pathItem);
         foreach ($parameters as $parameter) {
-            if (!in_array($parameter->in, ['header', 'path'])) {
-                continue;
-            }
-
-            if ($parameter->in === 'header') {
-                $openapiRouteContext[RouteContext::REQUEST_VALIDATE_HEADER_PARAMETERS][$parameter->name] = json_encode($parameter);
-            } elseif ($parameter->in === 'path') {
-                $openapiRouteContext[RouteContext::REQUEST_VALIDATE_PATH_PARAMETERS][$parameter->name] = json_encode($parameter);
-            }
+            $openapiRouteContext[RouteContext::REQUEST_VALIDATE_HEADER_PARAMETERS][$parameter->name] = json_encode($parameter);
         }
 
         if (isset($operation->requestBody->content->{'application/json'}->schema)) {
