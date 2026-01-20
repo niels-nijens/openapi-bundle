@@ -52,7 +52,7 @@ class RouteLoader extends FileLoader
     public function __construct(
         FileLocatorInterface $locator,
         SchemaLoaderInterface $schemaLoader,
-        bool $useOperationIdAsRouteName = false
+        bool $useOperationIdAsRouteName = false,
     ) {
         parent::__construct($locator);
 
@@ -100,7 +100,7 @@ class RouteLoader extends FileLoader
         string $resource,
         RouteCollection $collection,
         string $path,
-        stdClass $pathItem
+        stdClass $pathItem,
     ): void {
         $operations = get_object_vars($pathItem);
         foreach ($operations as $requestMethod => $operation) {
@@ -122,7 +122,7 @@ class RouteLoader extends FileLoader
         string $path,
         string $requestMethod,
         stdClass $operation,
-        stdClass $pathItem
+        stdClass $pathItem,
     ): void {
         $defaults = [];
         $openapiRouteContext = [
@@ -141,7 +141,7 @@ class RouteLoader extends FileLoader
 
         $defaults[RouteContext::REQUEST_ATTRIBUTE] = $openapiRouteContext;
 
-        $route = new Route($path, $defaults, []);
+        $route = new Route($path, $defaults, $this->getRouteRequirementsForPathParameters($operation, $pathItem));
         $route->setMethods($requestMethod);
 
         $routeName = null;
@@ -183,7 +183,7 @@ class RouteLoader extends FileLoader
         string $requestMethod,
         stdClass $operation,
         stdClass $pathItem,
-        array &$openapiRouteContext
+        array &$openapiRouteContext,
     ): void {
         $openapiRouteContext[RouteContext::REQUEST_BODY_REQUIRED] = false;
         if (isset($operation->requestBody->required)) {
@@ -198,24 +198,20 @@ class RouteLoader extends FileLoader
         }
 
         $openapiRouteContext[RouteContext::REQUEST_VALIDATE_QUERY_PARAMETERS] = [];
+        $parameters = $this->getParameters('query', $operation, $pathItem);
+        foreach ($parameters as $parameter) {
+            $openapiRouteContext[RouteContext::REQUEST_VALIDATE_QUERY_PARAMETERS][$parameter->name] = json_encode($parameter);
+        }
+
         $openapiRouteContext[RouteContext::REQUEST_VALIDATE_HEADER_PARAMETERS] = [];
         $openapiRouteContext[RouteContext::REQUEST_VALIDATE_PATH_PARAMETERS] = [];
-        $parameters = array_merge(
-            $pathItem->parameters ?? [],
-            $operation->parameters ?? []
-        );
+        $parameters = $this->getParameters(null, $operation, $pathItem);
         foreach ($parameters as $parameter) {
-            if (!in_array($parameter->in, ['query', 'header', 'path'])) {
+            if (!in_array($parameter->in, ['header', 'path'])) {
                 continue;
             }
 
-            if ($parameter instanceof Reference) {
-                $parameter = $parameter->resolve();
-            }
-
-            if ($parameter->in === 'query') {
-                $openapiRouteContext[RouteContext::REQUEST_VALIDATE_QUERY_PARAMETERS][$parameter->name] = json_encode($parameter);
-            } elseif ($parameter->in === 'header') {
+            if ($parameter->in === 'header') {
                 $openapiRouteContext[RouteContext::REQUEST_VALIDATE_HEADER_PARAMETERS][$parameter->name] = json_encode($parameter);
             } elseif ($parameter->in === 'path') {
                 $openapiRouteContext[RouteContext::REQUEST_VALIDATE_PATH_PARAMETERS][$parameter->name] = json_encode($parameter);
@@ -239,6 +235,79 @@ class RouteLoader extends FileLoader
                 $jsonPointer->escape('application/json')
             );
         }
+    }
+
+    private function getRouteRequirementsForPathParameters(stdClass $operation, stdClass $pathItem): array
+    {
+        $requirements = [];
+        $parameters = $this->getParameters('path', $operation, $pathItem);
+        foreach ($parameters as $parameter) {
+            $parameterSchema = $parameter->schema;
+
+            if (empty($parameterSchema->pattern ?? '') === false) {
+                $requirements[$parameter->name] = $parameterSchema->pattern;
+
+                continue;
+            }
+
+            if (empty($parameterSchema->enum ?? []) === false) {
+                $requirements[$parameter->name] = sprintf(
+                    '(%s)',
+                    implode(
+                        '|',
+                        array_map(function ($value) {
+                            return preg_quote($value, '/');
+                        }, $parameter->enum)
+                    )
+                );
+
+                continue;
+            }
+
+            $type = $parameterSchema->type ?? 'string';
+            $format = $parameterSchema->format ?? null;
+            $pattern = $parameterSchema->pattern ?? null;
+
+            $requirements[$parameter->name] = match ($type) {
+                'boolean' => '(?:true|false)',
+                'integer' => '-?\d+',
+                'number' => '-?(?:\d+)(?:\.\d+)?(?:[eE][+-]?\d+)?',
+                'string' => match (true) {
+                    $format === 'date' => '[0-9]{4}-(?:0[1-9]|1[012])-(?:0[1-9]|[12][0-9]|(?<!02-)3[01])',
+                    $format === 'date-time' => '[0-9]{4}-(?:0[1-9]|1[012])-(?:0[1-9]|[12][0-9]|(?<!02-)3[01])T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})',
+                    $format === 'email' => '[^/@]+@[^/]+\.[^/]+',
+                    $format === 'uuid' => '[0-9a-f]{8}-[0-9a-f]{4}-[13-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}',
+                    !empty($pattern) => $pattern,
+                    default => '[^/]+',
+                },
+                default => '[^/]+',
+            };
+        }
+
+        return $requirements;
+    }
+
+    private function getParameters(?string $in, stdClass $operation, stdClass $pathItem): array
+    {
+        $matchingParameters = [];
+        $parameters = array_merge(
+            $pathItem->parameters ?? [],
+            $operation->parameters ?? []
+        );
+
+        foreach ($parameters as $parameter) {
+            if ($in !== null && $parameter->in !== $in) {
+                continue;
+            }
+
+            if ($parameter instanceof Reference) {
+                $parameter = $parameter->resolve();
+            }
+
+            $matchingParameters[$parameter->name] = $parameter;
+        }
+
+        return $matchingParameters;
     }
 
     /**
